@@ -1,0 +1,28 @@
+{
+    "name": "mondorepo",
+    "version": "0.0.2",
+    "description": "More Mondo more repo",
+    "main": "index.js",
+    "bin": {
+        "mondo": "./bin/mondo.js"
+    },
+    "repository": "aphex/mondorepo",
+    "scripts": {
+        "test": "mocha tests",
+        "lint": "eslint ./src/**/*.js"
+    },
+    "keywords": [],
+    "author": "Sencha",
+    "license": "MIT",
+    "eslintConfig": ".eslintrc.json",
+    "devDependencies": {
+        "assert": "^1.4.1",
+        "eslint": "^3.5.0",
+        "mocha": "^3.0.2"
+    },
+    "dependencies": {
+        "bunyan": "^1.8.1",
+        "deep-extend": "^0.4.1",
+        "glob": "^7.0.6"
+    }
+}
