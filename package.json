@@ -6,7 +6,7 @@
     "bin": {
         "mondo": "./bin/mondo.js"
     },
-    "repository": "aphex/mondorepo",
+    "repository": "sencha/mondorepo",
     "scripts": {
         "test": "mocha tests",
         "lint": "eslint ./src/**/*.js"
