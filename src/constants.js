@@ -1,7 +1,10 @@
 "use strict";
 module.exports = {
-    manifest: "mondo.json",
-    child: ".mondo-child.json",
-    install: "mondo_repos",
-    packages: ["packages"]
+    manifest: 'package.json',
+    child: '.mondo.json',
+    install: 'mondo_repos',
+    packages: ['.'],
+    branch: 'master',
+    type: 'github',
+    container: 'container'
 };

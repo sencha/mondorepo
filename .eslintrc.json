@@ -7,7 +7,14 @@
     "rules": {
         "indent": [
             "error",
-            4
+            4,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "one-var": [
+            "error",
+            "never"
         ],
         "semi": [
             "error",
