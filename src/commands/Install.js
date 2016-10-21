@@ -1,5 +1,5 @@
 "use strict";
-require('colors');
+const chalk = require('chalk');
 const {Command} = require('switchit');
 const Repo = require('../Repo');
 const VCS = require('../VCS');
@@ -20,7 +20,7 @@ class Install extends Command {
             return this.installRepoPackages(repo);
         }
 
-        console.log(`Installing Repo '${repo.name}' from '${repo.source.repository}#${repo.source.branch}' into '${repo.path}'`.cyan);
+        console.log(chalk.cyan(`Installing Repo '${chalk.magenta(repo.name)}' from '${chalk.yellow(repo.source.repository)}#${chalk.magenta(repo.source.branch)}' into '${chalk.magenta(repo.path)}'`));
         return VCS.github.clone(repo.source.repository, repo.path, repo.source.branch).then(() => {
             return this.installRepoPackages(repo);
         });
@@ -51,7 +51,7 @@ class Install extends Command {
         let packages = repo.packages;
 
         for (let pkg of packages) {
-            console.log(`Installing Packages for '${repo.name}'`.blue);
+            console.log(chalk.blue(`Installing Packages for '${chalk.yellow(repo.name)}:${chalk.magenta(pkg.name)}'`));
             install = install.then(() => PackageManagers.npm.install(pkg.path));
         }
 

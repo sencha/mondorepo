@@ -1,6 +1,6 @@
 {
   "name": "mondorepo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "More Mondo more repo",
   "main": "index.js",
   "bin": {
@@ -21,11 +21,11 @@
     "mocha": "^3.0.2"
   },
   "dependencies": {
-    "colors": "^1.1.2",
+    "chalk": "^1.1.3",
     "deep-extend": "^0.4.1",
     "glob": "^7.0.6",
     "jsonfile": "^2.4.0",
     "simple-git": "^1.52.0",
-    "switchit": "git+https://github.com/dongryphon/switchit.git"
+    "switchit": "^1.0.2"
   }
 }
