@@ -326,7 +326,7 @@ class Repo {
             let manifest = this.manifest;
 
             if (manifest) {
-                let visiblePackages = this.packages.slice();
+                visiblePackages = this.packages.slice();
 
                 this.uses.forEach(repo => {
                     visiblePackages.push(...repo.packages);
