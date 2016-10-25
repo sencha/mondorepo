@@ -23,7 +23,8 @@ module.exports = {
                     console.log(`Fork Detected installing from '${chalk.yellow(repoPath)}#${chalk.magenta(branch)}' into '${path}'`);
                 }
 
-                SimpleGit().clone(`git@github.com:${repoPath}`, path, ['-b', branch, '--single-branch'], (err) => {
+                // SimpleGit().clone(`git@github.com:${repoPath}.git`, path, ['-b', branch, '--depth', '1', '--no-single-branch'], (err) => {
+                SimpleGit().clone(`git@github.com:${repoPath}.git`, path, ['-b', branch], (err) => {
                     if (err) {
                         reject(err);
                     } else {
