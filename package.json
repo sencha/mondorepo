@@ -1,17 +1,28 @@
 {
   "name": "mondorepo",
-  "version": "0.0.3",
-  "description": "More Mondo more repo",
+  "version": "0.1.0",
+  "description": "Management for collections of packages across teams",
   "main": "index.js",
   "bin": {
     "mondo": "./bin/mondo.js"
   },
-  "repository": "sencha/mondorepo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sencha/mondorepo.git"
+  },
   "scripts": {
-    "test": "mocha tests",
+    "test": "gulp",
     "lint": "eslint ./src/**/*.js"
   },
-  "keywords": [],
+  "keywords": [
+    "multimodule",
+    "repository",
+    "mondo",
+    "distributed",
+    "modular",
+    "packages",
+    "monorepo"
+  ],
   "author": "Sencha",
   "license": "MIT",
   "eslintConfig": ".eslintrc.json",
@@ -25,7 +36,16 @@
     "deep-extend": "^0.4.1",
     "glob": "^7.0.6",
     "jsonfile": "^2.4.0",
+    "ora": "^0.3.0",
     "simple-git": "^1.52.0",
-    "switchit": "^1.0.2"
+    "switchit": "^1.0.2",
+    "mkdirp": "latest"
+  },
+  "bugs": {
+    "url": "https://github.com/sencha/mondorepo/issues"
+  },
+  "homepage": "https://github.com/sencha/mondorepo#readme",
+  "directories": {
+    "test": "test"
   }
 }

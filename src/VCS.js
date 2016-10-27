@@ -20,7 +20,7 @@ module.exports = {
 
                 if (fork) {
                     repoPath = fork;
-                    console.log(`Fork Detected installing from '${chalk.yellow(repoPath)}#${chalk.magenta(branch)}' into '${path}'`);
+                    Logger.info(`Fork Detected installing from '${chalk.yellow(repoPath)}#${chalk.magenta(branch)}' into '${path}'`);
                 }
 
                 // SimpleGit().clone(`git@github.com:${repoPath}.git`, path, ['-b', branch, '--depth', '1', '--no-single-branch'], (err) => {
@@ -29,7 +29,7 @@ module.exports = {
                         reject(err);
                     } else {
                         if (fork) {
-                            SimpleGit(path).addRemote(constants.forkedRepoName, `git@github.com:${originalRepoPath}`, (err) => {
+                            SimpleGit(path).addRemote(constants.forkedRepoName, `git@github.com:${originalRepoPath}.git`, (err) => {
                                 if (err) {
                                     reject(err);
                                 } else {

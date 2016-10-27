@@ -4,6 +4,11 @@ const spawn = require('child_process').spawn;
 const Path = require('path');
 
 class Run extends Command {
+    beforeExecute (params) {
+        super.beforeExecute(params);
+        params.debug = this.root().debug;
+    }
+
     execute(params) {
         const file = params.file;
 
@@ -24,7 +29,10 @@ class Run extends Command {
 }
 
 Run.define({
-    switches: '[debug:boolean=false]',
+    help: {
+        '': 'Runs a file using `devtool`',
+        'file': 'The file to run'
+    },
     parameters: '[file=]'
 });
 

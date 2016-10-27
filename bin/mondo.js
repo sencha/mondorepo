@@ -1,5 +1,28 @@
 #!/usr/bin/env node
-const Mondo = require('../src/CLI');
-const mondo = new Mondo();
+const fs = require('fs'),
+      path = require('path');
 
-mondo.run();
+var cwd = path.resolve('.'),
+    Mondo,
+    mondoIndex;
+
+while (cwd && cwd !== '/') {
+    mondoIndex = path.resolve(cwd, "node_modules/mondorepo/src/cli.js");
+    if (fs.existsSync(mondoIndex)) {
+        Mondo = require(mondoIndex);
+        break;
+    }
+    cwd = path.dirname(cwd);
+}
+
+if (!Mondo) {
+    Mondo = require('../src/cli.js');
+}
+
+const mondo = new Mondo();
+mondo.run().then(function (){},
+    function (cause) {
+        console.error(mondo.params.debug ? cause : cause.message);
+        process.exit(1);
+    }
+);
