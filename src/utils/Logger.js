@@ -48,6 +48,14 @@ class Logger {
     setThreshold (threshold) {
         Logger.setThreshold(threshold);
     }
+
+    mute () {
+        Logger.mute();
+    }
+
+    unmute () {
+        Logger.unmute();
+    }
 }
 
 Logger._threshold = 0;

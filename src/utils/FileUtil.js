@@ -1,6 +1,8 @@
 "use strict";
 const Path = require('path');
 const fs = require("fs");
+
+const mkdirp = require('mkdirp');
 const cwd = process.cwd();
 
 class FileUtil {
@@ -42,6 +44,10 @@ class FileUtil {
         if (FileUtil.exists(path)) {
             return fs.lstatSync(path).isFile();
         }
+    }
+
+    static mkdirp (path) {
+        mkdirp.sync(path);
     }
 }
 

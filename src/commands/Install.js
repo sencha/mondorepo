@@ -1,7 +1,6 @@
 "use strict";
 const fs = require('fs');
 const path = require('path');
-const mkdirp = require('mkdirp');
 
 const chalk = require('chalk');
 const {Command} = require('switchit');
@@ -11,10 +10,10 @@ const constants = require('../constants');
 const Repo = require('../Repo');
 const VCS = require('../VCS');
 const PackageManagers = require('../PackageManagers');
-const Logger = require('..//utils/Logger');
-
+const Logger = require('../utils/Logger');
 const FileUtil = require('../utils/FileUtil');
-const settingsPath = path.resolve(constants.home, constants.settings);
+
+const isWindows = /^win/.test(process.platform);
 
 class Install extends Command {
     beforeExecute (params) {
@@ -24,7 +23,12 @@ class Install extends Command {
 
     execute(params) {
         let me = this;
+        let mondo = this.root();
+
         params.verbose = params.verbose || me.debug;
+        if (params.verbose) {
+            Logger.setThreshold('debug');
+        }
         PackageManagers.configure({
             debug: params.verbose
         });
@@ -32,13 +36,7 @@ class Install extends Command {
         me.binDirs = [];
         me.wrappedBins = [];
 
-        me.packageManager = PackageManagers.yarn;
-        if (FileUtil.exists(settingsPath)) {
-            const settings = require(settingsPath);
-            if (!!settings.useNpm) {
-                me.packageManager = PackageManagers.npm;
-            }
-        }
+        me.packageManager = PackageManagers[mondo.settings.packageManager || 'yarn'];
 
         let repo = Repo.open(process.cwd());
         return me.installRepo(repo.root).then(() => {
@@ -50,6 +48,39 @@ class Install extends Command {
                     me.spinner.text = message;
                     me.spinner.start();
                 }
+
+                let createWinBinary = (binDir, wrappedBin) => {
+                    let binPath = path.join(binDir, wrappedBin.name+'.cmd');
+                    let message = `- Creating ${chalk.green(binPath)}`;
+
+                    if (fs.existsSync(binPath)) {
+                        message = `- Binary ${chalk.green(binPath)} already exists, overwriting`;
+                        if (!me.spinner) {
+                            Logger.warn(message);
+                        }
+                    }
+
+                    Logger.debug(message);
+                    fs.writeFileSync(binPath, `@IF EXIST "%~dp0\node.exe" (\n  "%~dp0\\node.exe"  "%~dp0\\${wrappedBin.name}" %*\n) ELSE (\n  @SETLOCAL\n  @SET PATHEXT=%PATHEXT:;.JS;=;%\n  node  "%~dp0\\${wrappedBin.name}" %*\n)\n`);
+                    fs.chmodSync(binPath, '755');
+                };
+
+                let createUnixBinary = (binDir, wrappedBin) => {
+                    let binPath = path.join(binDir, wrappedBin.name);
+                    let message = `- Creating ${chalk.green(binPath)}`;
+
+                    if (fs.existsSync(binPath)) {
+                        message = `- Binary ${chalk.green(binPath)} already exists, overwriting`;
+                        if (!me.spinner) {
+                            Logger.warn(message);
+                        }
+                    }
+
+                    Logger.debug(message);
+                    fs.writeFileSync(binPath, `#! /usr/bin/env node\nrequire('mondorepo');\nrequire('${wrappedBin.pkg.name}/${wrappedBin.file}');\n`);
+                    fs.chmodSync(binPath, '755');
+                };
+
                 me.wrappedBins.forEach(function (wrappedBin) {
                     let message = `- Linking '${chalk.green(wrappedBin.name)}'`;
                     Logger.debug(message);
@@ -59,35 +90,18 @@ class Install extends Command {
                         me.spinner.start();
                     }
                     me.binDirs.forEach(function (binDir) {
-                        mkdirp.sync(binDir);
-                        let binPath = path.join(binDir, wrappedBin.name);
-                        let message = `- Creating ${chalk.green(binPath)}`;
-
-                        if (fs.existsSync(binPath)) {
-                            message = `- Binary ${chalk.green(binPath)} already exists, overwriting`;
-                            if (!me.spinner) {
-                                Logger.warn(message);
-                            }
+                        if (!fs.existsSync(binDir)) {
+                            FileUtil.mkdirp(binDir);
                         }
-
-                        Logger.debug(message);
-                        fs.writeFileSync(binPath, `#! /usr/bin/env node
-
-require('mondorepo');
-require('${wrappedBin.pkg.name}/${wrappedBin.file}');
-`);
-                        fs.chmodSync(binPath, '755');
+                        createUnixBinary(binDir, wrappedBin);
+                        if (isWindows) {
+                            createWinBinary(binDir, wrappedBin);
+                        }
                     });
-                    if (me.spinner) {
-                        me.spinner.succeed();
-                    }
                 });
                 if (me.spinner) {
                     me.spinner.succeed();
                 }
-            }
-            if (me.spinner) {
-                me.spinner.succeed();
             }
         });
     }
@@ -104,7 +118,7 @@ require('${wrappedBin.pkg.name}/${wrappedBin.file}');
             return me.installRepoPackages(repo);
         }
 
-        let message = chalk.cyan(`Cloning repository '${chalk.magenta(repo.name)}' from '${chalk.yellow(repo.source.repository)}#${chalk.magenta(repo.source.branch)}' into '${chalk.magenta(repo.path)}'`);
+        let message = chalk.cyan(`Cloning repository '${chalk.magenta(repo.name)}' from '${chalk.yellow(repo.source.repository)}#${chalk.magenta(repo.source.branch)}' into '${chalk.magenta(path.relative(process.cwd(), repo.path))}'`);
         Logger.debug(message);
         if (me.spinner) {
             me.spinner.succeed();
