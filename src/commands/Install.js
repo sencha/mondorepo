@@ -13,6 +13,9 @@ const VCS = require('../VCS');
 const PackageManagers = require('../PackageManagers');
 const Logger = require('..//utils/Logger');
 
+const FileUtil = require('../utils/FileUtil');
+const settingsPath = path.resolve(constants.home, constants.settings);
+
 class Install extends Command {
     beforeExecute (params) {
         super.beforeExecute(params);
@@ -28,6 +31,14 @@ class Install extends Command {
 
         me.binDirs = [];
         me.wrappedBins = [];
+
+        me.packageManager = PackageManagers.yarn;
+        if (FileUtil.exists(settingsPath)) {
+            const settings = require(settingsPath);
+            if (!!settings.useNpm) {
+                me.packageManager = PackageManagers.npm;
+            }
+        }
 
         let repo = Repo.open(process.cwd());
         return me.installRepo(repo.root).then(() => {
@@ -145,7 +156,7 @@ require('${wrappedBin.pkg.name}/${wrappedBin.file}');
             me.spinner.text = message;
             me.spinner.start();
         }
-        let install = PackageManagers.npm().install(repo.path);
+        let install = me.packageManager().install(repo.path);
         me.binDirs.push(path.join(repo.path, 'node_modules', '.bin'));
         let packages = repo.packages;
         for (let pkg of packages) {
@@ -158,7 +169,7 @@ require('${wrappedBin.pkg.name}/${wrappedBin.file}');
                     me.spinner.start();
                 }
 
-                return PackageManagers.npm().install(pkg.path).then(() => {
+                return me.packageManager().install(pkg.path).then(() => {
                     me.binDirs.push(path.join(pkg.path, 'node_modules', '.bin'));
                     let pkgJson = require(path.join(pkg.path, 'package.json'));
                     if (pkgJson.bin) {

@@ -8,7 +8,9 @@ const settingsPath = Path.resolve(constants.home, constants.settings);
 let forks = {};
 if (FileUtil.exists(settingsPath)) {
     const settings = require(settingsPath);
-    forks = settings.forks;
+    if (settings.forks) {
+        forks = settings.forks;
+    }
 }
 
 module.exports = {

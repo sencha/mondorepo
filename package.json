@@ -1,6 +1,6 @@
 {
   "name": "mondorepo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Management for collections of packages across teams",
   "main": "index.js",
   "bin": {
@@ -36,10 +36,11 @@
     "deep-extend": "^0.4.1",
     "glob": "^7.0.6",
     "jsonfile": "^2.4.0",
+    "mkdirp": "latest",
     "ora": "^0.3.0",
     "simple-git": "^1.52.0",
     "switchit": "^1.0.2",
-    "mkdirp": "latest"
+    "yarn": "^0.16.1"
   },
   "bugs": {
     "url": "https://github.com/sencha/mondorepo/issues"
