@@ -61,7 +61,7 @@ class Install extends Command {
                     }
 
                     Logger.debug(message);
-                    fs.writeFileSync(binPath, `@IF EXIST "%~dp0\node.exe" (\n  "%~dp0\\node.exe"  "%~dp0\\${wrappedBin.name}" %*\n) ELSE (\n  @SETLOCAL\n  @SET PATHEXT=%PATHEXT:;.JS;=;%\n  node  "%~dp0\\${wrappedBin.name}" %*\n)\n`);
+                    fs.writeFileSync(binPath, `@IF EXIST "%~dp0\\node.exe" (\n  "%~dp0\\node.exe"  "%~dp0\\${wrappedBin.name}" %*\n) ELSE (\n  @SETLOCAL\n  @SET PATHEXT=%PATHEXT:;.JS;=;%\n  node  "%~dp0\\${wrappedBin.name}" %*\n)\n`);
                     fs.chmodSync(binPath, '755');
                 };
 
