@@ -11,7 +11,9 @@ class Yarn extends PackageManager {
     spawn (args, options) {
         let me = this;
         return new Promise((resolve, reject) => {
-            let process = spawn(`${path.resolve(__dirname, "../../node_modules/.bin/yarn")}${isWindows ? '.cmd' : ''}`, args, options);
+            let yarnPath = require.resolve('.bin/yarn');
+            Logger.debug(`Using yarn from: ${yarnPath}`);
+            let process = spawn(`${yarnPath}`, args, options);
 
             let result = '';
             if (!me.debug) {
