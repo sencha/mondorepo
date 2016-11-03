@@ -4,6 +4,7 @@ const chalk = require('chalk');
 const SimpleGit = require('simple-git');
 const FileUtil = require('./utils/FileUtil');
 const constants = require('./constants');
+const Logger = require('./utils/Logger');
 const settingsPath = Path.resolve(constants.home, constants.settings);
 let forks = {};
 if (FileUtil.exists(settingsPath)) {

@@ -1,6 +1,7 @@
 const chalk = require('chalk');
 const path = require('path');
 const spawn = require('child_process').spawn;
+const exec = require('child_process').execSync;
 
 const PackageManager = require('./Base');
 const Logger = require('../utils/Logger');
@@ -8,16 +9,13 @@ const Logger = require('../utils/Logger');
 const isWindows = /^win/.test(process.platform);
 
 class Yarn extends PackageManager {
-    spawn (args, options) {
-        let me = this;
+    spawn(args, options) {
         return new Promise((resolve, reject) => {
-            let yarnPath = require.resolve('.bin/yarn') + (isWindows ? '.cmd': '');
-            Logger.debug(`Using yarn from: ${yarnPath}`);
-            let process = spawn(`${yarnPath}`, args, options);
+            let process = spawn(`yarn${isWindows ? '.cmd' : ''}`, args, options);
 
             let result = '';
-            if (!me.debug) {
-                process.stdout.on('data', function (data) {
+            if (!Logger.debug.enabled) {
+                process.stdout.on('data', function(data) {
                     result += data.toString();
                 });
             }
@@ -35,14 +33,23 @@ class Yarn extends PackageManager {
         });
     }
 
-    install (path) {
+    install(path) {
         let me = this;
         let args = ['install'];
-        let opts = { cwd: path };
-        if (me.debug) {
+        let opts = {cwd: path};
+        if (Logger.debug.enabled) {
             opts['stdio'] = 'inherit';
         }
         return me.spawn(args, opts);
+    }
+
+    available() {
+        try {
+            exec('yarn --version');
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 }
 

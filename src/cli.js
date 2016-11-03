@@ -7,19 +7,14 @@ const Install = require('./commands/Install');
 const Run = require('./commands/Run');
 const Logger = require('./utils/Logger');
 const FileUtil = require('./utils/FileUtil');
-const constants = require('./constants')
+const constants = require('./constants');
 
 class Mondo extends Container {
-    constructor () {
-        super();
-
-    }
-
-    beforeExecute (params) {
+    beforeExecute(params) {
         let me = this;
         super.beforeExecute(params);
-        me.debug = params.debug;
-        Logger.setThreshold(me.debug ? 'debug' : 'info');
+
+        Logger.setThreshold(params.verbose ? 'debug' : (params.quiet ? 'warn' : 'info'));
         me.settingsPath = path.resolve(constants.home, constants.settings);
         let settings = {};
         if (FileUtil.exists(me.settingsPath)) {
@@ -33,9 +28,10 @@ class Mondo extends Container {
 Mondo.define({
     help: {
         '': 'Management for collections of packages across teams',
-        debug: 'Enable debug mode (additional logging)'
+        quiet: 'Provide less logging output (remove info)',
+        verbose: 'Provide verbose logging output'
     },
-    switches: '[debug:boolean=false]',
+    switches: '[quiet:boolean=false] [verbose:boolean=false]',
     commands: {
         help: Help,
         install: Install,

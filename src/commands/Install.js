@@ -1,6 +1,6 @@
 "use strict";
 const fs = require('fs');
-const path = require('path');
+const Path = require('path');
 
 const chalk = require('chalk');
 const {Command} = require('switchit');
@@ -16,29 +16,21 @@ const FileUtil = require('../utils/FileUtil');
 const isWindows = /^win/.test(process.platform);
 
 class Install extends Command {
-    beforeExecute (params) {
-        super.beforeExecute(params);
-        this.debug = this.root().debug;
-    }
-
-    execute(params) {
+    execute() {
         let me = this;
         let mondo = this.root();
-
-        params.verbose = params.verbose || me.debug;
-        if (params.verbose) {
-            Logger.setThreshold('debug');
-        }
-        PackageManagers.configure({
-            debug: params.verbose
-        });
 
         me.binDirs = [];
         me.wrappedBins = [];
 
-        me.packageManager = PackageManagers[mondo.settings.packageManager || 'yarn'];
+        me.packageManager = (PackageManagers[mondo.settings.packageManager] || PackageManagers.yarn)();
 
-        let repo = Repo.open(process.cwd());
+        // Fallback to NPM when any package manager is not available
+        if (!me.packageManager.available()) {
+            me.packageManager = PackageManagers.npm();
+        }
+
+        const repo = Repo.open(process.cwd());
         return me.installRepo(repo.root).then(() => {
             if (me.wrappedBins.length > 0) {
                 let message = 'Linking local binaries';
@@ -50,7 +42,7 @@ class Install extends Command {
                 }
 
                 let createWinBinary = (binDir, wrappedBin) => {
-                    let binPath = path.join(binDir, wrappedBin.name+'.cmd');
+                    let binPath = Path.join(binDir, wrappedBin.name + '.cmd');
                     let message = `- Creating ${chalk.green(binPath)}`;
 
                     if (fs.existsSync(binPath)) {
@@ -66,7 +58,7 @@ class Install extends Command {
                 };
 
                 let createUnixBinary = (binDir, wrappedBin) => {
-                    let binPath = path.join(binDir, wrappedBin.name);
+                    let binPath = Path.join(binDir, wrappedBin.name);
                     let message = `- Creating ${chalk.green(binPath)}`;
 
                     if (fs.existsSync(binPath)) {
@@ -81,7 +73,7 @@ class Install extends Command {
                     fs.chmodSync(binPath, '755');
                 };
 
-                me.wrappedBins.forEach(function (wrappedBin) {
+                me.wrappedBins.forEach(function(wrappedBin) {
                     let message = `- Linking '${chalk.green(wrappedBin.name)}'`;
                     Logger.debug(message);
                     if (me.spinner) {
@@ -89,7 +81,7 @@ class Install extends Command {
                         me.spinner.text = message;
                         me.spinner.start();
                     }
-                    me.binDirs.forEach(function (binDir) {
+                    me.binDirs.forEach(function(binDir) {
                         if (!fs.existsSync(binDir)) {
                             FileUtil.mkdirp(binDir);
                         }
@@ -99,9 +91,9 @@ class Install extends Command {
                         }
                     });
                 });
-                if (me.spinner) {
-                    me.spinner.succeed();
-                }
+            }
+            if (me.spinner) {
+                me.spinner.succeed();
             }
         });
     }
@@ -115,10 +107,15 @@ class Install extends Command {
         repo.installed = true;
 
         if (repo.exists()) {
+            if (repo.isRoot) {
+                const childPath = Path.resolve(repo.path, constants.child);
+                fs.writeFileSync(childPath, JSON.stringify({root: true}));
+            }
+
             return me.installRepoPackages(repo);
         }
 
-        let message = chalk.cyan(`Cloning repository '${chalk.magenta(repo.name)}' from '${chalk.yellow(repo.source.repository)}#${chalk.magenta(repo.source.branch)}' into '${chalk.magenta(path.relative(process.cwd(), repo.path))}'`);
+        let message = chalk.cyan(`Cloning repository '${chalk.magenta(repo.name)}' from '${chalk.yellow(repo.source.repository)}#${chalk.magenta(repo.source.branch)}' into '${chalk.magenta(Path.relative(process.cwd(), repo.path))}'`);
         Logger.debug(message);
         if (me.spinner) {
             me.spinner.succeed();
@@ -127,11 +124,7 @@ class Install extends Command {
         }
 
         return VCS.github.clone(repo.source.repository, repo.path, repo.source.branch).then(() => {
-            fs.writeFile(path.join(repo.path, constants.child), JSON.stringify({root: path.relative(repo.path, process.cwd())}), function(err) {
-                if (err) {
-                    return me.raise(err);
-                }
-            });
+            fs.writeFileSync(Path.join(repo.path, constants.child), JSON.stringify({root: Path.relative(repo.path, process.cwd())}));
             return me.installRepoPackages(repo);
         });
     }
@@ -161,7 +154,7 @@ class Install extends Command {
 
         let message = `Installing packages for '${chalk.yellow(repo.name)}'`;
         Logger.debug(message);
-        if (!me.params.verbose) {
+        if (!Logger.debug.enabled) {
             if (me.spinner) {
                 me.spinner.succeed();
             } else {
@@ -170,8 +163,8 @@ class Install extends Command {
             me.spinner.text = message;
             me.spinner.start();
         }
-        let install = me.packageManager().install(repo.path);
-        me.binDirs.push(path.join(repo.path, 'node_modules', '.bin'));
+        let install = me.packageManager.install(repo.path);
+        me.binDirs.push(Path.join(repo.path, 'node_modules', '.bin'));
         let packages = repo.packages;
         for (let pkg of packages) {
             install = install.then(() => {
@@ -179,15 +172,15 @@ class Install extends Command {
                 Logger.debug(message);
                 if (me.spinner) {
                     me.spinner.succeed();
-                    me.spinner.text= message;
+                    me.spinner.text = message;
                     me.spinner.start();
                 }
 
-                return me.packageManager().install(pkg.path).then(() => {
-                    me.binDirs.push(path.join(pkg.path, 'node_modules', '.bin'));
-                    let pkgJson = require(path.join(pkg.path, 'package.json'));
+                return me.packageManager.install(pkg.path).then(() => {
+                    me.binDirs.push(Path.join(pkg.path, 'node_modules', '.bin'));
+                    let pkgJson = require(Path.join(pkg.path, 'package.json'));
                     if (pkgJson.bin) {
-                        Object.keys(pkgJson.bin).forEach(function (name) {
+                        Object.keys(pkgJson.bin).forEach(function(name) {
                             me.wrappedBins.push({
                                 pkg: pkg,
                                 name: name,
@@ -207,10 +200,8 @@ class Install extends Command {
 
 Install.define({
     help: {
-        '': 'Brings the mondo in!',
-        verbose: 'Provide additional output'
-    },
-    switches: '[verbose:boolean=false]'
+        '': 'Brings the mondo in!'
+    }
 });
 
 module.exports = Install;

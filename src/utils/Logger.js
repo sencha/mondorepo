@@ -1,63 +1,63 @@
-const chalk = require('chalk');
-
 const levels = ['error', 'warn', 'info', 'debug'];
+//const chalk = require('chalk');
 //const colors = ['red', 'yellow', 'blue', 'black'];
 
 class Logger {
-    static mute () {
-        Logger._oldthreshold = Logger._threshold;
-        Logger._threshold = -1;
-        Logger._muted = true;
-    }
-
-    static setThreshold (threshold = 0) {
-        if (threshold instanceof String || typeof threshold == 'string') {
-            threshold = threshold.trim().toLowerCase();
-            threshold = levels.indexOf(threshold);
-        }
-        if (isNaN(parseFloat(threshold)) || !isFinite(threshold) || threshold < 0) {
-            threshold = 0;
-        }
-        Logger._threshold = threshold;
-    }
-
-    static unmute () {
-        Logger.setThreshold(Logger._oldthreshold);
-        Logger._muted = false;
-    }
-
-    // ----------------------------------------------
-
     constructor () {
-        let me = this;
-        levels.forEach((level, idx) => {
-            me[level] = (message) => {
-                if (idx<=Logger._threshold) {
-                    console.log(message);
-                }
-            }
-        })
+        this.muted = 0;
+        this.setThreshold('info');
     }
 
-    log (message) {
-        if (!Logger._muted) {
-            console.log(message);
+    log (...args) {
+        if (!this.muted) {
+            console.log(...args);
         }
     }
 
-    setThreshold (threshold) {
-        Logger.setThreshold(threshold);
+    error(...args) {
+        if (!this.muted) {
+            console.error(...args);
+        }
+    }
+
+    warn(...args) {
+        if (!this.muted) {
+            console.warn(...args);
+        }
+    }
+
+    info(...args) {
+        if (!this.muted && this.info.enabled) {
+            console.info(...args);
+        }
+    }
+
+    debug(...args) {
+        if (!this.muted && this.debug.enabled) {
+            console.log(...args);
+        }
+    }
+
+    setThreshold (threshold = 'info') {
+        let enabled = true;
+
+        for (let level of levels) {
+            this[level].enabled = enabled;
+            if (level === threshold) {
+                enabled = false;
+            }
+        }
     }
 
     mute () {
-        Logger.mute();
+        this.muted++;
     }
 
     unmute () {
-        Logger.unmute();
+        if (this.muted) {
+            this.muted--;
+        }
     }
 }
-
-Logger._threshold = 0;
 
 module.exports = new Logger();

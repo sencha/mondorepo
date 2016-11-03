@@ -14,8 +14,14 @@ class Resolver {
     alias(id) {
         let aliases = this.config.resolve.alias;
         let slash = id.indexOf('/');
+        let scopeTest = id.match(/^(@.*?\/.*)/);
+        let scopePathTest = id.match(/^(@.*?\/.*?)\/(.*)/);
 
-        if (slash < 0) {
+        if (scopePathTest) {  //Scoped package with a path to a file
+            let packageName = scopePathTest[1];
+            let value = aliases[packageName];
+            id = Path.resolve(value, scopePathTest[2]);
+        } else if (slash < 0 || scopeTest) {
             let value = aliases[id] || aliases[`${id}$`];
             if (value) {
                 return value;

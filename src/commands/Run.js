@@ -4,16 +4,10 @@ const spawn = require('child_process').spawn;
 const Path = require('path');
 
 class Run extends Command {
-    beforeExecute (params) {
-        super.beforeExecute(params);
-        params.debug = this.root().debug;
-    }
-
     execute(params) {
         const file = params.file;
-
         if (params.debug) {
-            let args = ['--require', `${Path.resolve(__dirname, '..', 'Init.js')}`, file];
+            let args = ['--require', `${Path.resolve(__dirname, '..', 'init.js')}`, file];
             let devtool = spawn('devtool', args);
 
             devtool.stdout.pipe(process.stdout);
@@ -22,7 +16,7 @@ class Run extends Command {
                 process.exit(code);
             });
         } else {
-            require(Path.resolve(__dirname, '..', 'Init'));
+            require(Path.resolve(__dirname, '..', 'init'));
             require(Path.resolve(process.cwd(), file));
         }
     }
@@ -33,7 +27,8 @@ Run.define({
         '': 'Runs a file using `devtool`',
         'file': 'The file to run'
     },
-    parameters: '[file=]'
+    parameters: '[file=]',
+    switches: '[debug:boolean=false]'
 });
 
 

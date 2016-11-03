@@ -8,15 +8,14 @@ const isWindows = /^win/.test(process.platform);
 
 class Npm extends PackageManager {
     spawn (args, options) {
-        let me = this;
         return new Promise((resolve, reject) => {
-            if (!me.debug) {
+            if (!Logger.debug.enabled) {
                 spawn(`npm${isWindows ? '.cmd' : ''}`, ['set', 'progress=false'], options);
             }
             let process = spawn(`npm${isWindows ? '.cmd' : ''}`, args, options);
 
             let result = '';
-            if (!me.debug) {
+            if (!Logger.debug.enabled) {
                 process.stdout.on('data', function (data) {
                     result += data.toString();
                 });
@@ -26,8 +25,8 @@ class Npm extends PackageManager {
                 if (code) {
                     reject(`NPM install exited with code: ${code}`);
                 } else {
-                    Logger.debug(result.trim());
-                    if (!me.debug) {
+                    if (!Logger.debug.enabled) {
+                        Logger.debug(result.trim());
                         spawn(`npm${isWindows ? '.cmd' : ''}`, ['set', 'progress=true'], options);
                     }
                     resolve();
@@ -42,7 +41,7 @@ class Npm extends PackageManager {
         let me = this;
         let args = ['install'];
         let opts = { cwd: path };
-        if (me.debug) {
+        if (Logger.debug.enabled) {
             opts['stdio'] = 'inherit';
         } else {
             args.push('--depth');

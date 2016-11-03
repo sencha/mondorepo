@@ -8,7 +8,7 @@ module.exports = {
     packages: ['.'],
     branch: 'master',
     type: 'github',
-    container: 'container',
+    repo: 'repo',
     home: Path.resolve(os.homedir(), '.mondo'),
     settings: 'settings.json',
     forkedRepoName: 'upstream'

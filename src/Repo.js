@@ -16,18 +16,20 @@ class Repo {
     static getRepoPath(manifestPath) {
         let parentDirectory = Path.resolve(manifestPath, '..');
         let manifestFile = Path.resolve(manifestPath, constants.manifest);
+        let childFile = Path.resolve(manifestPath, constants.child);
 
+        // If there is a .mondo.json you are a Repo for sure
+        if (FileUtil.exists(childFile)) {
+            return manifestPath;
+        }
+
+        // check the package.json for declaration of mondo repo'ness
         if (FileUtil.exists(manifestFile)) {
             let json = jsonfile.readFileSync(manifestFile);
             let mondo = json.mondo || {};
-            if (mondo[constants.container]) {
-                let childFile = Path.resolve(manifestPath, constants.child);
-                if (FileUtil.exists(childFile)) {
-                    let childManifest = require(childFile);
-                    return Path.resolve(manifestPath, childManifest.root, constants.manifest);
-                } else {
-                    return manifestPath;
-                }
+
+            if (mondo[constants.repo]) {
+                return manifestPath;
             }
         }
 
@@ -86,7 +88,7 @@ class Repo {
             let allPackages = this.allPackages;
             allPackageAliases = this._allPackageAliases = {};
             allPackages.forEach(pkg => {
-                this._allPackageAliases[pkg.name] = pkg.path;
+                this._allPackageAliases[pkg.name] = pkg.base;
             });
         }
 
@@ -187,7 +189,7 @@ class Repo {
 
             if (manifest) {
                 let mondo = this.mondo || {};
-                let directories = mondo.packages || Array.from(constants.packages);
+                let directories = mondo.packages === false ? [] : mondo.packages || Array.from(constants.packages);
                 let manifestPath = this.path;
 
                 if (!Array.isArray(directories)) {
@@ -207,8 +209,7 @@ class Repo {
                     }
 
                     for (let npmPackagePath of npmPackagesPaths) {
-                        let npmPackage = new Package(npmPackagePath);
-                        npmPackage._repo = this;
+                        let npmPackage = new Package(npmPackagePath, this);
                         packages.push(npmPackage);
                     }
                 }
@@ -253,7 +254,7 @@ class Repo {
             // Does a mondo descriptor file exist for this repo
             if (FileUtil.exists(mondoDescriptorFile)) {
                 let mondoDescriptor = require(mondoDescriptorFile);
-                let rootRepoPath = Path.resolve(manifestPath, mondoDescriptor.root || '.');
+                let rootRepoPath = Path.resolve(manifestPath, (mondoDescriptor.root === true ? '.' : mondoDescriptor.root) || '.');
 
                 // Descriptor has a path pointing to the root repo
                 if (rootRepoPath !== manifestPath) {
@@ -373,8 +374,8 @@ class Repo {
                 if (sourceRepository !== existingSourceRepository || sourceBranch !== existingSourceBranch) {
                     throw new Error(`'${name}' repo source mismatch. '${sourceRepository}@${sourceBranch}' mismatch '${existingSourceRepository}@${existingSourceBranch}`);
                 }
-            } else if (!this.isRoot) {
-                throw new Error(`Attempt to register a non-root Repo without source information. Configure 'source' for '${this.name}'`);
+            } else if (!repo.isRoot) {
+                throw new Error(`Attempt to register a non-root Repo without source information. Configure 'source' for '${repo.name}'`);
             }
         } else {
             let installDir = this.installDir;
@@ -412,7 +413,7 @@ class Repo {
         if (!this._manifest) {
             if (this.exists()) {
                 this._manifest = require(this._manifestFile);
-                this.name = this._manifest.name;
+                this.name = (this._manifest.mondo && this._manifest.mondo.name) || this._manifest.name;
             } else {
                 throw new Error(`Unable to find Repo manifest at '${this._manifestFile}`);
             }
