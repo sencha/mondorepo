@@ -23,10 +23,11 @@ class Install extends Command {
         me.binDirs = [];
         me.wrappedBins = [];
 
-        VCS.configure({
-            forks: mondo.settings.forks
+        me.vcs = VCS.git({
+            forks: mondo.settings.forks || {}
         });
-        if (!VCS.git().available()) {
+
+        if (!me.vcs.available()) {
             throw new Error('Git is required to run `mondo install`');
         }
 
@@ -77,7 +78,7 @@ class Install extends Command {
                     }
 
                     Logger.debug(message);
-                    fs.writeFileSync(binPath, `#! /usr/bin/env node\nrequire('mondorepo');\nrequire('${wrappedBin.pkg.name}/${wrappedBin.file}');\n`);
+                    fs.writeFileSync(binPath, `#! /usr/bin/env node\nrequire('mondorepo/src/init');\nrequire('${wrappedBin.pkg.name}/${wrappedBin.file}');\n`);
                     fs.chmodSync(binPath, '755');
                 };
 
@@ -123,7 +124,7 @@ class Install extends Command {
             return me.installRepoPackages(repo);
         }
 
-        let message = chalk.cyan(`Cloning repository '${chalk.magenta(repo.name)}' from '${chalk.yellow(repo.source.repository)}#${chalk.magenta(repo.source.branch)}' into '${chalk.magenta(Path.relative(process.cwd(), repo.path))}'`);
+        let message = chalk.cyan(`Cloning repository '${chalk.magenta(repo.name)}' from '${chalk.yellow(repo.source.repository)}#${chalk.magenta(repo.source.branch || constants.branch)}' into '${chalk.magenta(Path.relative(process.cwd(), repo.path))}'`);
         Logger.debug(message);
         if (me.spinner) {
             me.spinner.succeed();
@@ -133,7 +134,7 @@ class Install extends Command {
 
 
 
-        return VCS.git().clone(repo.source.repository, repo.path, repo.source.branch).then(() => {
+        return me.vcs.clone(repo.source.repository, repo.path, repo.source.branch).then(() => {
             fs.writeFileSync(Path.join(repo.path, constants.child), JSON.stringify({root: Path.relative(repo.path, process.cwd())}));
             return me.installRepoPackages(repo);
         });

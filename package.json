@@ -1,6 +1,6 @@
 {
   "name": "mondorepo",
-  "version": "0.1.6",
+  "version": "0.1.75",
   "description": "Management for collections of packages across teams",
   "main": "index.js",
   "bin": {

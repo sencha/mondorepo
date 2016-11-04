@@ -1,18 +1,25 @@
 #!/usr/bin/env node
-const fs = require('fs'),
-      path = require('path');
+const fs = require('fs');
+const Path = require('path');
 
-var cwd = path.resolve('.'),
-    Mondo,
-    mondoIndex;
+let cwd = Path.resolve('.');
+let Mondo;
+let mondoIndex;
 
-while (cwd && cwd !== '/') {
-    mondoIndex = path.resolve(cwd, "node_modules/mondorepo/src/cli.js");
+while (cwd) {
+    mondoIndex = Path.resolve(cwd, "node_modules/mondorepo/src/cli.js");
     if (fs.existsSync(mondoIndex)) {
         Mondo = require(mondoIndex);
         break;
+    } else {
+        let parentDir = Path.resolve(cwd, '..');
+
+        if (parentDir === cwd) {
+            cwd = null;
+        } else {
+            cwd = parentDir;
+        }
     }
-    cwd = path.dirname(cwd);
 }
 
 if (!Mondo) {
