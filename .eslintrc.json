@@ -14,7 +14,10 @@
         ],
         "one-var": [
             "error",
-            "never"
+            {
+                "initialized": "never",
+                "uninitialized": "always"
+            }
         ],
         "semi": [
             "error",

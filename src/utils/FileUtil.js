@@ -55,6 +55,11 @@ class FileUtil {
     }
 
     static writeFile (path, contents) {
+        const dir = Path.dirname(path);
+        if (!fs.existsSync(dir)) {
+            FileUtil.mkdirp(dir);
+        }
+
         return fs.writeFileSync(path, contents);
     }
 }

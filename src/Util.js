@@ -4,9 +4,9 @@ const Util = {
             return item;
         }
 
-        var type = Object.prototype.toString.call(item),
-            clone = item,
-            i, key;
+        const type = Object.prototype.toString.call(item);
+        let clone = item;
+        let i, key;
 
         if (type === '[object Date]') {
             clone = new Date(item.getTime());
@@ -38,7 +38,7 @@ const Util = {
                     let sourceKey = destination[key];
 
                     if (sourceKey && sourceKey.constructor === Object) {
-                        merge(sourceKey, value);
+                        Util.merge(sourceKey, value);
                     }
                     else {
                         destination[key] = Util.clone(value);
