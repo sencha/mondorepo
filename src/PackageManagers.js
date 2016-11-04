@@ -2,24 +2,20 @@ const Npm = require('./pkgMgrs/Npm');
 const Yarn = require('./pkgMgrs/Yarn');
 
 class PackageManagers {
-    constructor () {
-        this._managers = {};
+    static configure (opts) {
+        PackageManagers._opts = opts;
     }
 
-    configure (opts) {
-        this._opts = opts;
-    }
-
-    registerPackageManager (name, packageManager) {
-        let me = this;
+    static registerPackageManager (name, packageManager) {
+        let me = PackageManagers;
         me._managers[name] = packageManager;
         me[name] = () => new me._managers[name](me._opts);
     }
 }
 
-let collection = new PackageManagers();
+PackageManagers._managers = {};
 
-collection.registerPackageManager('npm', Npm);
-collection.registerPackageManager('yarn', Yarn);
+PackageManagers.registerPackageManager('npm', Npm);
+PackageManagers.registerPackageManager('yarn', Yarn);
 
-module.exports = collection;
+module.exports = PackageManagers;

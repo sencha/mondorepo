@@ -49,6 +49,14 @@ class FileUtil {
     static mkdirp (path) {
         mkdirp.sync(path);
     }
+
+    static getFileContents (path) {
+        return fs.readFileSync(path, 'UTF-8');
+    }
+
+    static writeFile (path, contents) {
+        return fs.writeFileSync(path, contents);
+    }
 }
 
 module.exports = FileUtil;

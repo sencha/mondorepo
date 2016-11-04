@@ -3,7 +3,7 @@ const {Command} = require('switchit');
 const spawn = require('child_process').spawn;
 const Path = require('path');
 
-class Run extends Command {
+class Exec extends Command {
     execute(params) {
         const file = params.file;
         if (params.debug) {
@@ -22,9 +22,9 @@ class Run extends Command {
     }
 }
 
-Run.define({
+Exec.define({
     help: {
-        '': 'Runs a file using `devtool`',
+        '': 'Executes a .js file using `devtool`',
         'file': 'The file to run'
     },
     parameters: '[file=]',
@@ -32,7 +32,7 @@ Run.define({
 });
 
 
-module.exports = Run;
+module.exports = Exec;
 
 // TODO: Add all params for devtool
 /*

@@ -1,10 +1,13 @@
 "use strict";
 const path = require('path');
 
+const JSON5 = require('json5');
+
 const {Container, Help} = require('switchit');
 const Version = require('./commands/Version');
 const Install = require('./commands/Install');
-const Run = require('./commands/Run');
+const Exec = require('./commands/Exec');
+const Fork = require('./commands/Fork');
 const Logger = require('./utils/Logger');
 const FileUtil = require('./utils/FileUtil');
 const constants = require('./constants');
@@ -16,12 +19,11 @@ class Mondo extends Container {
 
         Logger.setThreshold(params.verbose ? 'debug' : (params.quiet ? 'warn' : 'info'));
         me.settingsPath = path.resolve(constants.home, constants.settings);
-        let settings = {};
+        me.settings = {};
         if (FileUtil.exists(me.settingsPath)) {
             Logger.debug(`Loading settings file from ${me.settingsPath}`);
-            settings = require(me.settingsPath);
+            me.settings = JSON5.parse(FileUtil.getFileContents(me.settingsPath));
         }
-        me.settings = settings;
     }
 }
 
@@ -35,8 +37,9 @@ Mondo.define({
     commands: {
         help: Help,
         install: Install,
-        run: Run,
-        version: Version
+        exec: Exec,
+        version: Version,
+        fork: Fork
     }
 });
 

@@ -23,10 +23,18 @@ class Install extends Command {
         me.binDirs = [];
         me.wrappedBins = [];
 
+        VCS.configure({
+            forks: mondo.settings.forks
+        });
+        if (!VCS.git().available()) {
+            throw new Error('Git is required to run `mondo install`');
+        }
+
         me.packageManager = (PackageManagers[mondo.settings.packageManager] || PackageManagers.yarn)();
 
         // Fallback to NPM when any package manager is not available
         if (!me.packageManager.available()) {
+            Logger.debug('Global yarn not found, using npm instead.');
             me.packageManager = PackageManagers.npm();
         }
 
@@ -123,7 +131,9 @@ class Install extends Command {
             me.spinner.start();
         }
 
-        return VCS.github.clone(repo.source.repository, repo.path, repo.source.branch).then(() => {
+
+
+        return VCS.git().clone(repo.source.repository, repo.path, repo.source.branch).then(() => {
             fs.writeFileSync(Path.join(repo.path, constants.child), JSON.stringify({root: Path.relative(repo.path, process.cwd())}));
             return me.installRepoPackages(repo);
         });

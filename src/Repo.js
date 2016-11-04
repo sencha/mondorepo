@@ -47,6 +47,9 @@ class Repo {
     static open(repoPath = cwd) {
         repoPath = FileUtil.absolute(repoPath);
         repoPath = Repo.getRepoPath(repoPath);
+        if (repoPath == null) {
+            throw new Error('Repository not found. Are you missing the `repo: true` config?');
+        }
         let repo = new Repo({path: repoPath});
         repo.open();
 

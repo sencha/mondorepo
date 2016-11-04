@@ -1,6 +1,4 @@
 const levels = ['error', 'warn', 'info', 'debug'];
-//const chalk = require('chalk');
-//const colors = ['red', 'yellow', 'blue', 'black'];
 
 class Logger {
     constructor () {
