@@ -11,19 +11,32 @@ const Fork = require('./commands/Fork');
 const Logger = require('./utils/Logger');
 const FileUtil = require('./utils/FileUtil');
 const constants = require('./constants');
+const Util = require('./Util');
+
+const defaultSettings = {
+    forks: {
+        //
+    }
+};
 
 class Mondo extends Container {
     beforeExecute(params) {
-        let me = this;
         super.beforeExecute(params);
 
+        let me = this;
+
         Logger.setThreshold(params.verbose ? 'debug' : (params.quiet ? 'warn' : 'info'));
+
         me.settingsPath = path.resolve(constants.home, constants.settings);
-        me.settings = {};
+
+        let settings;
+
         if (FileUtil.exists(me.settingsPath)) {
             Logger.debug(`Loading settings file from ${me.settingsPath}`);
-            me.settings = JSON5.parse(FileUtil.getFileContents(me.settingsPath));
+            settings = JSON5.parse(FileUtil.getFileContents(me.settingsPath));
         }
+
+        me.settings = Util.merge(Util.merge({}, defaultSettings), settings);
     }
 }
 
