@@ -16,7 +16,7 @@ const FileUtil = require('../utils/FileUtil');
 const isWindows = /^win/.test(process.platform);
 
 class Install extends Command {
-    execute() {
+    execute(params) {
         let me = this;
         let mondo = this.root();
 
@@ -24,7 +24,7 @@ class Install extends Command {
         me.wrappedBins = [];
 
         me.vcs = VCS.git({
-            forks: mondo.settings.forks || {}
+            forks: params.forks ? mondo.settings.forks || {} : {}
         });
 
         if (!me.vcs.available()) {
@@ -211,8 +211,10 @@ class Install extends Command {
 
 Install.define({
     help: {
-        '': 'Brings the mondo in!'
-    }
+        '': 'Brings the mondo in!',
+        'fork': 'Enable local fork settings when downloading repos'
+    },
+    switches: '[forks:boolean=true]'
 });
 
 module.exports = Install;
