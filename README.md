@@ -21,9 +21,9 @@ The Node.js package ecosystem has been traditionally developed following the
     What is a package?
     A package is any of the following:
 
-    a) a folder containing a program described by a package.json file
-    ...
-    g) a git url that, when cloned, results in (a).
+       a) a folder containing a program described by a package.json file
+       ...
+       g) a git url that, when cloned, results in (a).
 
 This is workable for developing packages that are small in size or complexity and live in 
 relative isolation. As projects' scale increases this approach has a couple significant
