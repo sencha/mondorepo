@@ -16,11 +16,18 @@ One project, multiple packages and repositories, all aware of each other at runt
 
 ## Motivation
 The Node.js package ecosystem has been traditionally developed following the 
-*one package per repository* rule, which is a workable solution for 
-developing packages that are small in size or complexity and live in 
-relative isolation.
+*[one package per repository](https://docs.npmjs.com/how-npm-works/packages)* rule:
 
-As projects' scale increases this approach has a couple significant problems. 
+    What is a package?
+    A package is any of the following:
+
+    a) a folder containing a program described by a package.json file
+    ...
+    g) a git url that, when cloned, results in (a).
+
+This is workable for developing packages that are small in size or complexity and live in 
+relative isolation. As projects' scale increases this approach has a couple significant
+problems. 
 
 1. The amount of code in a complex project often increases beyond what would 
    ideally live in a single package.
