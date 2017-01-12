@@ -7,6 +7,8 @@ const {Container, commands} = require('switchit');
 const Install = require('./commands/Install');
 const Exec = require('./commands/Exec');
 const Fork = require('./commands/Fork');
+const Publish = require('./commands/Publish');
+const Rev = require('./commands/Rev');
 const Logger = require('./utils/Logger');
 const FileUtil = require('./utils/FileUtil');
 const constants = require('./constants');
@@ -54,6 +56,8 @@ Mondo.define({
         help: commands.Help,
         install: Install,
         exec: Exec,
+        rev: Rev,
+        publish: Publish,
         version: commands.Version,
         fork: Fork
     }

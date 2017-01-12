@@ -5,31 +5,27 @@ const PackageManager = require('./Base');
 const Logger = require('../utils/Logger');
 
 const isWindows = /^win/.test(process.platform);
+const npm = `npm${isWindows ? '.cmd' : ''}`;
 
 class Npm extends PackageManager {
-    spawn (args, options) {
+    spawn(args, options) {
         return new Promise((resolve, reject) => {
-            if (!Logger.debug.enabled) {
-                spawn(`npm${isWindows ? '.cmd' : ''}`, ['set', 'progress=false'], options);
-            }
-            let process = spawn(`npm${isWindows ? '.cmd' : ''}`, args, options);
+            let process = spawn(npm, args, options);
 
             let result = '';
-            if (!Logger.debug.enabled) {
-                process.stdout.on('data', function (data) {
-                    result += data.toString();
-                });
-            }
+            process.stdout.on('data', function(data) {
+                result += data.toString();
+            });
+
+            process.stderr.on('data', function(data) {
+                result += data.toString();
+            });
 
             process.on('close', (code) => {
                 if (code) {
-                    reject(`NPM install exited with code: ${code}`);
+                    reject(new Error(`NPM ${args.join(' ')} exited with code: ${code}:\n${result}`));
                 } else {
-                    if (!Logger.debug.enabled) {
-                        Logger.debug(result.trim());
-                        spawn(`npm${isWindows ? '.cmd' : ''}`, ['set', 'progress=true'], options);
-                    }
-                    resolve();
+                    resolve(result);
                 }
             });
 
@@ -37,17 +33,41 @@ class Npm extends PackageManager {
         });
     }
 
-    install (path) {
-        let me = this;
-        let args = ['install'];
-        let opts = { cwd: path };
+    install(path) {
+        const me = this;
+        const args = ['install'];
+        const opts = {cwd: path};
+        let install = '';
+
         if (Logger.debug.enabled) {
             opts['stdio'] = 'inherit';
-        } else {
-            args.push('--depth');
-            args.push('0');
+            return me.spawn(args, opts);
         }
-        return me.spawn(args, opts);
+
+        args.push('--depth');
+        args.push('0');
+        return me.spawn(['set', 'progress=false'], opts)
+            .then(() => {
+                return me.spawn(args, opts);
+            }).then(result => {
+                install = result;
+                Logger.debug(result.trim());
+                return me.spawn(['set', 'progress=true']);
+            }).then(() => {
+                return install;
+            });
+    }
+
+    view(name, version) {
+        const pkg = name + (version !== undefined ? `@${version}` : '');
+        const args = ['view', pkg, '--json'];
+        return this.spawn(args);
+    }
+
+    publish(path) {
+        const opts = {cwd: path};
+        const args = ['publish'];
+        return this.spawn(args, opts);
     }
 }
 

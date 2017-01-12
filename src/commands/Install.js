@@ -212,7 +212,7 @@ class Install extends Command {
 Install.define({
     help: {
         '': 'Brings the mondo in!',
-        'fork': 'Enable local fork settings when downloading repos'
+        'forks': 'Enable local fork settings when downloading repos'
     },
     switches: '[forks:boolean=true]'
 });
