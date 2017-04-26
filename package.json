@@ -38,7 +38,7 @@
         "deep-extend": "^0.4.1",
         "glob": "^7.0.6",
         "hash-files": "^1.1.1",
-        "json5": "^0.5.0",
+        "json5": "^0.5.1",
         "jsonfile": "^2.4.0",
         "mkdirp": "latest",
         "ora": "^0.3.0",

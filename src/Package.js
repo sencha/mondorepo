@@ -5,6 +5,7 @@ const Graph = require('./Graph.js');
 const glob = require('glob');
 const hashFiles = require('hash-files');
 const semver = require('semver');
+const JSON5 = require('json5');
 
 class Package {
 
@@ -17,11 +18,11 @@ class Package {
 
         this._packageFile = packageFile;
         this._packagePath = Path.dirname(packageFile);
-        this._package = require(packageFile) || {};
+        this._package = JSON5.parse(FileUtil.getFileContents(packageFile)) || {};
         this._mondo = (this._package && this._package.mondo) || {};
         this._basePath = Path.resolve(this.path, this._mondo.base || '.');
         if (!this._package.version) {
-            throw new Error(`Package '${this._name}' requires a version`);
+            throw new Error(`Package '${this._package.name}' requires a version`);
         }
         this._version = semver(this._package.version);
         this._repo = repo;

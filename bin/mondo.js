@@ -29,6 +29,7 @@ if (!Mondo) {
 const mondo = new Mondo();
 mondo.run().then(function (){},
     function (cause) {
+        console.log("");
         console.error(chalk.red(mondo.params.debug ? cause : cause.message));
         process.exit(1);
     }
